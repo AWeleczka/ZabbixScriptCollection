@@ -1,0 +1,9 @@
+triggerid=123
+eventid=456
+hostname=localhost
+status=OK
+severity=Disaster
+triggername=Test Trigger
+itemname=testitem
+itemvalue=95.8%
+
