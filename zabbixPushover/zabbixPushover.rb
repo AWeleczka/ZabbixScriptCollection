@@ -17,7 +17,7 @@ unless usertoken.nil? or payload.nil?
   zabbixdata = Hash.new
   payload.split("\n").each { |load|
     tmp = load.split("=")
-    zabbixdata[tmp[0]] = tmp[1]
+    zabbixdata[tmp[0].strip] = tmp[1].strip
   }
   unless zabbixdata["TRIGGER.STATUS"].nil? && zabbixdata["TRIGGER.SEVERITY"].nil?
     subject 	= ""
