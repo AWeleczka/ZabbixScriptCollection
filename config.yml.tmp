@@ -1,0 +1,5 @@
+zabbix:
+  host: http://127.0.0.1/zabbix
+pushover:
+  endpoint: https://api.pushover.net/1/messages.json
+  apptoken: abcdefghijklmnopqrstuvw

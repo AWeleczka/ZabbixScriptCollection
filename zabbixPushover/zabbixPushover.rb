@@ -3,19 +3,27 @@
 
 require 'uri'
 require 'net/http'
+require 'YAML'
 
-# Information related to Pushover-API
-pushoverhost  = 'https://api.pushover.net/1/messages.json'
-pushovertoken = ''
+currentdir = File.dirname(__FILE__)
+unless File.file?(currentdir + '/../config.yml')
+  puts 'E: You have to create the "config.yml" file in the root directory of '\
+       'this repository first.'
+  if File.file?(currentdir + '/../config.yml.tmp')
+    puts 'I: You can get started by copying the "config.yml.tmp" file from'\
+         'the root directory'
+  else
+    puts 'I: Check the original repository at '\
+         '"https://github.com/AWeleczka/ZabbixScriptCollection" for a template'
+  end
+  exit 1
+end
 
-# Information related to your Zabbix-Server
-zabbixhost = 'http://127.0.0.1/zabbix'
-
-###
+config = YAML.load_file('../config.yml')
 
 usertoken, payload = ARGV
 unless usertoken.nil? || payload.nil?
-  puts 'Usage: ./zabbixPushover.rb <pushover_user_token> <zabbix_payload>'
+  puts 'E: Usage: ./zabbixPushover.rb <pushover_user_token> <zabbix_payload>'
   exit 1
 end
 
@@ -26,7 +34,7 @@ payload.split("\n").each do |load|
 end
 
 unless zabbixdata['TRIGGER.STATUS'].nil? || zabbixdata['TRIGGER.SEVERITY'].nil?
-  puts 'Payload is missing required data'
+  puts 'E: Payload is missing required data'
   exit 1
 end
 
@@ -36,7 +44,7 @@ priority = '0'
 retrie   = ''
 expire   = ''
 eventurl = [
-  zabbixhost,
+  config['zabbix']['host'],
   '/tr_events.php?triggerid=',
   read_from_hash(zabbixdata, 'TRIGGER.ID'),
   '&eventid=',
@@ -90,10 +98,10 @@ else
   end
 end
 
-uri = URI(pushoverhost)
+uri = URI(config['pushover']['endpoint'])
 req = Net::HTTP::Post.new(uri.path)
 req.set_form_data(
-  'token' => pushovertoken,
+  'token' => config['pushover']['apptoken'],
   'user' => usertoken,
   'html' => 1,
   'title' => subject,
@@ -105,7 +113,7 @@ req.set_form_data(
   'expire' => expire
 )
 
-puts Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+puts 'I: ' + Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
   http.request(req)
 end
 exit 0
