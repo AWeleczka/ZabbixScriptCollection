@@ -5,6 +5,14 @@ require 'uri'
 require 'net/http'
 require 'yaml'
 
+def read_from_hash(hash, key)
+  if hash[key].nil?
+    '{' + key + '}'
+  else
+    hash[key]
+  end
+end
+
 currentdir = File.dirname(__FILE__)
 unless File.file?(currentdir + '/../config.yml')
   puts 'E: You have to create the "config.yml" file in the root directory of '\
@@ -22,7 +30,7 @@ end
 config = YAML.load_file(currentdir + '/../config.yml')
 
 usertoken, payload = ARGV
-unless usertoken.nil? || payload.nil?
+unless !usertoken.nil? && !payload.nil?
   puts 'E: Usage: ./zabbixPushover.rb <pushover_user_token> <zabbix_payload>'
   exit 1
 end
@@ -33,7 +41,7 @@ payload.split("\n").each do |load|
   zabbixdata[tmp[0].strip] = tmp[1].strip
 end
 
-unless zabbixdata['TRIGGER.STATUS'].nil? || zabbixdata['TRIGGER.SEVERITY'].nil?
+unless !zabbixdata['TRIGGER.STATUS'].nil? && !zabbixdata['TRIGGER.SEVERITY'].nil?
   puts 'E: Payload is missing required data'
   exit 1
 end
@@ -113,15 +121,7 @@ req.set_form_data(
   'expire' => expire
 )
 
-puts 'I: ' + Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
   http.request(req)
 end
 exit 0
-
-def read_from_hash(hash, key)
-  if hash[key].nil?
-    '{' + key + '}'
-  else
-    hash[key]
-  end
-end
