@@ -19,7 +19,7 @@ unless File.file?(currentdir + '/../config.yml')
   exit 1
 end
 
-config = YAML.load_file('../config.yml')
+config = YAML.load_file(currentdir + '/../config.yml')
 
 usertoken, payload = ARGV
 unless usertoken.nil? || payload.nil?
