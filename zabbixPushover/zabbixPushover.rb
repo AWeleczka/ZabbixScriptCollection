@@ -3,7 +3,7 @@
 
 require 'uri'
 require 'net/http'
-require 'YAML'
+require 'yaml'
 
 currentdir = File.dirname(__FILE__)
 unless File.file?(currentdir + '/../config.yml')
